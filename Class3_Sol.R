@@ -1,5 +1,10 @@
+targetVar = 'NextReport'
 
-DataSplit = function(x, perc, removeFirst, targetVar){
+predThreshold = 0.9
+
+trainPerc = 0.75
+
+DataSplit = function(x, targetVar, removeFirst = T, perc = .75){
 
   #Number of data points in the training set
   nTrain = ceiling(dim(x)[1] * perc)
@@ -29,3 +34,18 @@ DataSplit = function(x, perc, removeFirst, targetVar){
   return(finalData)
 }
 
+loadData = function(){
+  
+  #Set environment variables
+  dbConnStr = paste0('driver={SQL Server Native Client 11.0};',
+                     'server=.;',
+                     'database=UIC2;',
+                     'trusted_connection=yes;')
+  
+  #Set up connection and load data object -- replace by a function
+  dbConn = odbcDriverConnect(connection=dbConnStr)
+  reportData = sqlQuery(dbConn, 'SELECT * FROM dbo.vw_DataFrame')
+  close(dbConn)
+  
+  return(reportData)
+}
