@@ -89,3 +89,28 @@ trainRF = function(x.train, x.valid, targetVar, threshold=0.9, ...){
   return(rfMod)
 }
 
+
+EDAVar = function(x, columntitle){
+  jpeg(paste0("c:/temp/test/", columntitle, ".jpg"), 900, 900)
+  par(mar = c(0.5, 4.1, 2.1, 2.1))
+  layout(mat = c(1, 2, 3), heights = c(2, 3, 3))
+  boxplot(x, horizontal = T, axes = F, main = columntitle)
+  box()
+  par(mar = c(1.1, 4.1, 1, 2.1))
+  hist(x, freq = F, main="")
+  d = density(x)
+  lines(x = d, col = 'red')
+  box()
+  grid()
+  par(mar = c(3.1, 4.1, 2.1, 2.1))
+  plot(x)
+  dev.off()
+}
+
+
+EDARapper = function(x){
+  for (i in 1:dim(x)[2]){
+    EDAVar(x[,i], columntitle = names(x)[i])
+  }
+}
+
