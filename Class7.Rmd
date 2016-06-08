@@ -1,0 +1,236 @@
+---
+title: "ioslides"
+author: "Sam Mourad"
+date: "June 7, 2016"
+output:
+  ioslides_presentation:
+    logo: images/logo.png
+    widescreen: yes
+---
+<!-- Get Shiny Introduction to R Markdown
+http://shiny.rstudio.com/articles/rmarkdown.html -->
+
+<!-- Get R MarkDown documents at
+http://rmarkdown.rstudio.com/index.html -->
+
+
+<!--
+KB shortcuts in display modes:
+  f, w, o, h, p modes
+output options:
+  smaller: for smaller text or {.smaller} added to slide header
+  transition: default, slower, faster, or number of seconds
+  incremental: true for incremental presentation or {.build} to slide header
+  css: myStyles.css to added custom CSS styles file
+      refer to Custom CSS section at the following link
+      http://rmarkdown.rstudio.com/ioslides_presentation_format.html
+  
+-->
+
+# Exploratory Data Analysis
+
+## Measures of Central Tendency | Mean, Median, and Mode
+
+This is a very important presentation and the numbers you see on this slide mean everything for the future of the company.
+
+- Mean of loan amount is
+```{r, echo=FALSE}
+d <- read.csv(file = "c:/temp/loan.csv", 
+              nrows = 1000)[,c("member_id","addr_state",
+                               "loan_amnt","grade",
+                               "emp_length","issue_d",
+                               "int_rate","home_ownership",
+                               "verification_status","annual_inc",
+                               "purpose")]
+mean(d$loan_amnt)
+```
+
+- Median of loan amount is
+```{r, echo=FALSE}
+median(d$loan_amnt)
+```
+
+- Mode of loan amount is
+```{r, echo=FALSE}
+names(sort(table(d$loan_amnt), decreasing = T))[1]
+```
+
+## Measures of Spread | Incremental bullet points
+
+>- Variance of loan amount is `r format(var(d$loan_amnt), digits = 2, scientific = FALSE)`
+
+>- Range of *loan* amount is `r max(d$loan_amnt) - min(d$loan_amnt)`
+
+>- InterQuartile Range of loan amount is `r IQR(d$loan_amnt)`
+
+## Distribution - Symmetry and tail | Highlight portion of text
+
+- Skewness of loan amount is
+```{r, echo=FALSE}
+library(psych)
+skew(d$loan_amnt)
+```
+
+<b>
+- Kurtosis of loan amount
+```{r, echo=FALSE}
+kurtosi(d$loan_amnt)
+```
+</b>
+
+## Descriptive Statistics | Let's use a simple table
+
+```{r, include=FALSE}
+options(scipen=999)
+lamin <-  min(d$loan_amnt)
+lamax <-  max(d$loan_amnt)
+lamean <- mean(d$loan_amnt)
+irmin <-  min(d$int_rate)
+irmax <-  max(d$int_rate)
+irmean <- mean(d$int_rate)
+aimin <-  min(d$annual_inc)
+aimax <-  max(d$annual_inc)
+aimean <- mean(d$annual_inc)
+```
+
+ Statistic Loan Amount     Int Rate       Annual Income
+---------- ------------ ----------------  -------------
+Min          `r lamin`        `r irmin`             `r aimin`
+Max          `r lamax`        `r irmax`             `r aimax`
+Mean        `r lamean`        `r irmean`           `r aimean`
+
+Table: Demonstration of simple table syntax.
+
+## Descriptive Statistics | with a multiline table
+
+: Demonstration of multiline table syntax.
+
+----------------------------------------------------
+  Statistic Loan Amount     Int Rate   Annual Income
+----------- ------------- ------------ -------------
+Min         `r lamin`          `r irmin`           `r aimin`
+  
+Max         `r lamax`             `r irmax`         `r aimax` <br> what are they going
+                                                      to do with all this money?
+
+Mean        `r lamean`           `r irmean`         `r aimean`
+----------------------------------------------------
+
+
+Let's draw a graph
+==================
+
+I can graph | while showing code
+--------------------------------
+
+```{r}
+plot(x = d$int_rate, y = d$loan_amnt, xlab = "Interest Rate", ylab = "Loan Amount")
+```
+
+## I can center-graph | without showing any code
+
+<div class="centered">
+```{r, echo=FALSE}
+plot(x = d$emp_length, y = d$loan_amnt, xlab = "Employment Length", ylab = "Loan Amount")
+```
+</div>
+
+## Pie Chart | loaded as a picture {.flexbox .vcenter}
+
+![A savory pie chart](images/piechart.jpg)
+
+## Pie Chart | with legend {.smaller}
+
+<div class="columns-2">
+```{r, echo=FALSE, fig.width=5, fig.height=5}
+hist(d$loan_amnt, xlab = "Loan Amount", main = "Histogram of Loan Amount")
+```
+<div class="red2">  
+  - Skewed right
+</div>
+  - Majority under $20K
+  - Loans are between 0 and $35k
+</div>
+
+## Google Bubble Chart
+
+```{r, echo=FALSE, results='asis'}
+suppressPackageStartupMessages(library(googleVis))
+op <- options(gvis.plot.tag="chart")
+options(op)
+df <- d
+df$issue_d <- as.character(df$issue_d)
+df$year <- as.numeric(substr(df$issue_d,
+                             nchar(df$issue_d)-3, nchar(df$issue_d)))
+loan_amnt <- aggregate(df$loan_amnt, by=list(df$addr_state, df$year),
+                       FUN=sum)
+names(loan_amnt) <- c("addr_state","year","totalamount")
+
+#Sort data for viewing - optional
+loan_amnt <- loan_amnt[order(loan_amnt$addr_state, loan_amnt$year),]
+
+#Aggregate and find mean of annual income and interest rate
+int_income <- aggregate(df[,c("annual_inc","int_rate")],
+                        by=list(df$addr_state, df$year),
+                        FUN=mean)
+names(int_income) <- c("addr_state","year","mean_income","mean_int")
+
+#Sort data for viewing - optional
+int_income <- int_income[order(int_income$addr_state, int_income$year),]
+
+#Combine tables
+finalDF = merge(loan_amnt, int_income, 
+                by = intersect(names(loan_amnt), names(int_income)))
+finalDF$addr_state <- as.character(finalDF$addr_state)
+
+#Plot
+bubble <- gvisBubbleChart(finalDF, idvar = "addr_state",
+                          xvar = "mean_int", yvar = "mean_income",
+                          colorvar = "addr_state", sizevar = "totalamount")
+
+bubble
+```
+
+## Google Bubble Chart | without footer {.vcenter}
+
+```{r, echo=FALSE, results='asis'}
+bubble <- gvisBubbleChart(finalDF, idvar = "addr_state",
+                          xvar = "mean_int", yvar = "mean_income",
+                          colorvar = "addr_state", sizevar = "totalamount",
+                          options=list(
+                            chartArea=
+                              '{left:100, top:50, width:"80%", height:"80%"}',
+                            height=400, width=900
+                          ))
+print(bubble, 'chart')
+```
+
+## Google Motion Chart
+
+```{r, echo=FALSE, results='asis'}
+motion <- gvisMotionChart(finalDF, idvar = "addr_state",
+                          timevar = "year", sizevar = "totalamount",
+                          xvar = "mean_int", yvar = "mean_income",
+                          options=list(
+                            chartArea=
+                              '{left:100, top:100, width:"80%", height:"80%"}',
+                            height=400, width=900
+                          ))
+print(motion, 'chart')
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
