@@ -27,6 +27,11 @@ output options:
   
 -->
 
+<!-- Adobe Flash Player settings for gvis Motion Chart
+
+http://www.macromedia.com/support/documentation/en/flashplayer/help/settings_manager04.html
+-->
+
 # Exploratory Data Analysis
 
 ## Measures of Central Tendency | Mean, Median, and Mode
@@ -67,7 +72,7 @@ names(sort(table(d$loan_amnt), decreasing = T))[1]
 
 - Skewness of loan amount is
 ```{r, echo=FALSE}
-library(psych)
+suppressWarnings(library(psych))
 skew(d$loan_amnt)
 ```
 
@@ -97,7 +102,7 @@ aimean <- mean(d$annual_inc)
 ---------- ------------ ----------------  -------------
 Min          `r lamin`        `r irmin`             `r aimin`
 Max          `r lamax`        `r irmax`             `r aimax`
-Mean        `r lamean`        `r irmean`           `r aimean`
+Mean        $`r lamean`        `r irmean`           `r aimean`
 
 Table: Demonstration of simple table syntax.
 
